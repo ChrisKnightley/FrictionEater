@@ -1,3 +1,10 @@
+/*
+  << megaTinyCore Setting >>
+   Chip : ATtiny3217
+  Clock : 16 MHz internal
+  millis() / micros()  : Dsabled
+  UPDI&Reset Pin Func. : UPDI
+*/
 #pragma GCC optimize ("O3")
 #define FLATTEN __attribute__((__flatten__))
 #define INLINED __attribute__((__always_inline__))
@@ -5,15 +12,20 @@
 #define ASM __asm__ __volatile__
 #define ASM_ISR (true)
 
+#define DEBUG_OUTPUT  (true)
+#define BATTERY_CHECK (false)
+#define HEATER_ENABLE (false)
+
 static constexpr unsigned char PIXEL_NUM = 128;
 volatile unsigned char LineData[PIXEL_NUM]; // Pixel Data Array
+unsigned char CalibrationData[PIXEL_NUM]; // Correction Data Array
 
-static constexpr float LowBatteryThreshold = 3.40;
+static constexpr float LowBatteryThreshold = 3.2;
 static constexpr unsigned char LandingDetectThreshold = 25;
 
 static constexpr unsigned int  MinimumExposureTime = 5; // ms
 static constexpr unsigned int  MaximumExposureTime = 100; // ms
-static constexpr unsigned int  ExposureAdjustSpeed = 2000; // Tick(2us)
+static constexpr unsigned int  ExposureAdjustSpeed = 2000; // Tick(@2us)
 
 static constexpr unsigned int MinimumExposureTick = (unsigned int)(MinimumExposureTime * 500);
 static constexpr unsigned int MaximumExposureTick = (unsigned int)(MaximumExposureTime * 500);
@@ -41,5 +53,6 @@ enum ModeList {
   MODE_TIGHT_RIGHT,
   MODE_LOST,
   MODE_COMPLETION,
+  MODE_CALIBRATION,
   MODE_LOWBATTERY,
 } currentMode;
