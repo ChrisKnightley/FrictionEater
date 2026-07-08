@@ -13,24 +13,43 @@ void analyzeData() {
       {
         unsigned char minValue = 0;
         unsigned char maxValue = 0;
-        unsigned char pxCount = 0;
-        unsigned int section[5] = {0, 0, 0, 0, 0};
-        // Serial.write(0xFF); // Debugger Reset Command Byte
-        for (unsigned char px : LineData) {
-          // Serial.write(px == 0xFF ? 0xFE : px); // Data Output For Debug
-          if (maxValue < px) maxValue = px;
-          if (minValue > px) minValue = px;
-          if (++pxCount <= 14) {
-          } else if (pxCount <= (20 * 1 + 14)) {
-            section[0] += px;
-          } else if (pxCount <= (20 * 2 + 14)) {
-            section[1] += px;
-          } else if (pxCount <= (20 * 3 + 14)) {
-            section[2] += px;
-          } else if (pxCount <= (20 * 4 + 14)) {
-            section[3] += px;
-          } else if (pxCount <= (20 * 5 + 14)) {
-            section[4] += px;
+        unsigned char current = 0;
+        unsigned int section[7] = {0, 0, 0, 0, 0, 0, 0};
+#if (DEBUG_OUTPUT)
+        Serial.write(0xFF); // Debugger Flush Command Byte
+        for (unsigned char px = 0; px < PIXEL_NUM; px++) {
+          Serial.write(LineData[px] == 0xFF ? 0xFE : LineData[px]); // Raw Data Output For Debug
+#else
+        for (unsigned char px = 0; px < PIXEL_NUM; px++) {
+#endif
+          if (maxValue < LineData[px]) maxValue = LineData[px];
+          if (minValue > LineData[px]) minValue = LineData[px];
+          switch (current) {
+            case 0:
+              if (px >= 19) current++;
+              break;
+            case 1:
+              section[current] += LineData[px] + CalibrationData[px];
+              if (px >= 37) current++;
+              break;
+            case 2:
+              section[current] += LineData[px] + CalibrationData[px];
+              if (px >= 55) current++;
+              break;
+            case 3:
+              section[current] += LineData[px] + CalibrationData[px];
+              if (px >= 71) current++;
+              break;
+            case 4:
+              section[current] += LineData[px] + CalibrationData[px];
+              if (px >= 89) current++;
+              break;
+            case 5:
+              section[current] += LineData[px] + CalibrationData[px];
+              if (px >= 107) current++;
+              break;
+            case 6:
+              break;
           }
         }
         if (maxValue >= 0xFF) {
@@ -47,29 +66,33 @@ void analyzeData() {
         if ((maxValue - minValue) < 20) {
           currentMode = MODE_LOST;
         } else {
-          unsigned char darkSection = 0;
-          unsigned int tempValue = section[0];
-          for (unsigned char i = 1; i < 5; i++) {
-            if (section[i] < tempValue) {
-              tempValue = section[i];
-              darkSection = i;
+          unsigned char darkSection = 1;
+          unsigned int tempValue = section[1];
+          for (current = 2; current <= 5; current++) {
+            if (section[current] < tempValue) {
+              tempValue = section[current];
+              darkSection = current;
             }
           }
           switch (darkSection) {
-            case 0:
+            case 1:
               currentMode = MODE_TIGHT_RIGHT;
               break;
-            case 1:
+            case 2:
               currentMode = MODE_GENTLE_RIGHT;
               break;
-            case 2:
+            case 3:
               currentMode = MODE_STRAIGHT;
               break;
-            case 3:
+            case 4:
               currentMode = MODE_GENTLE_LEFT;
               break;
-            case 4:
+            case 5:
               currentMode = MODE_TIGHT_LEFT;
+              break;
+            case 0:
+            default:
+              currentMode = MODE_LOST;
               break;
           }
         }

@@ -2,7 +2,7 @@ void setup() {
   cli();
   takeOverTCA0();
   Serial.swap(1);
-  Serial.begin(1000000);
+  Serial.begin(500000);
   USART0.CTRLB &= ~USART_RXEN_bm; // Disable UART-RX
 
   pinMode(PG_UPDI, INPUT_PULLUP);
@@ -45,8 +45,8 @@ void setup() {
   CPUINT.LVL1VEC = ADC0_RESRDY_vect_num;
 
   VREF.CTRLC  = VREF_ADC1REFSEL_2V5_gc;
-  VREF.CTRLA  = VREF_ADC0REFSEL_2V5_gc | VREF_DAC0REFSEL_4V34_gc;
-  VREF.CTRLD  =                          VREF_DAC2REFSEL_4V34_gc;
+  VREF.CTRLA  = VREF_ADC0REFSEL_4V34_gc | VREF_DAC0REFSEL_4V34_gc;
+  VREF.CTRLD  =                           VREF_DAC2REFSEL_4V34_gc;
   VREF.CTRLB |= VREF_ADC0REFEN_bm;
   VREF.CTRLB |= VREF_ADC1REFEN_bm;
   VREF.CTRLB |= VREF_DAC0REFEN_bm;
@@ -116,7 +116,7 @@ void setup() {
 
   RTC.PITINTCTRL = RTC_PI_bm;
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm);
-  RTC.PITCTRLA   = RTC_PERIOD_CYC8192_gc | RTC_PITEN_bm;
+  RTC.PITCTRLA   = RTC_PERIOD_CYC1024_gc | RTC_PITEN_bm;
 
   EVSYS.ASYNCCH3 = EVSYS_ASYNCCH3_TCD0_CMPASET_gc;
   EVSYS.ASYNCUSER8 = EVSYS_ASYNCUSER8_ASYNCCH3_gc; // EVOUT0
@@ -175,16 +175,22 @@ void setup() {
 
   DAC0.CTRLA = DAC_ENABLE_bm;
   DAC0.DATA  = (unsigned char)(255.0 * LowBatteryThreshold / 4.34);
-  AC0.MUXCTRLA = (AC0_AINPMUX << AC_MUXPOS_gp) | AC_MUXNEG_DAC_gc | AC_INVERT_bm;
+  AC0.MUXCTRLA = (AC0_AINPMUX << AC_MUXPOS_gp) | AC_MUXNEG_DAC_gc;
   AC0.CTRLA    = AC_HYSMODE_50mV_gc | AC_ENABLE_bm;
 
   sei();
 
   Heater_OFF();
+  CameraLED_OFF();
+  LandingLED_OFF();
+  readCalibration();
   MotorPower(MOTOR_ON);
-  digitalWriteFast(OPT_LED, LOW);
   LED_Left(0, 0, 0);
   LED_Right(0, 0, 0);
   ledUpdate();
-  currentMode = MODE_AWAKENING;
+  if (digitalRead(PG_UPDI)) {
+    currentMode = MODE_AWAKENING;
+  } else {
+    currentMode = MODE_CALIBRATION;
+  }
 }

@@ -1,30 +1,30 @@
-#if ASM_ISR
+#if (ASM_ISR)
 ISR(ADC0_RESRDY_vect, ISR_NAKED) {
   ASM(
-    " out %[GP0], r24     \n\t" // Alternative PUSH
-    "  in    r24, %[SRG]  \n\t" // Alternative PUSH
-    " out %[GP1], r24     \n\t" // Alternative PUSH
-    " out %[GP2], r30     \n\t" // Alternative PUSH
-    " out %[GP3], r31     \n\t" // Alternative PUSH
+    " out %[GP0], r24     \n\t" // 1 Alternative PUSH
+    "  in    r24, %[SRG]  \n\t" // 1
+    " out %[GP1], r24     \n\t" // 1
+    " out %[GP2], r30     \n\t" // 1
+    " out %[GP3], r31     \n\t" // 1
 
-    " ldi    r24, 2            \n\t" // Set Event Channel
-    " sts %[EVA], r24          \n\t" // Send Event Strobe to Async (-> TCB START)
-    " lds    r30, %[TCA]       \n\t" // Read TCA Counter Value
-    " sts %[EVS], r24          \n\t" // Send Event Strobe to Sync (-> TCA COUNT+)
-    " lds    r24, %[ADC]       \n\t" // Read ADC Result Value
-    " ldi    r31, lo8(%[DAT])  \n\t" // Load Memory Address Low Byte
-    " add    r30, r31          \n\t" // Add Fetched Counter Value
-    " ldi    r31, hi8(%[DAT])  \n\t" // Load Memory Address High Byte
-    "sbci    r31, 0            \n\t" // Add Carry Flag
-    "  st     -Z, r24          \n\t" // Decrement 1 and Write to Memory
+    " ldi    r24, 2            \n\t" // 1 Set Event Channel
+    " sts %[EVA], r24          \n\t" // 2 Send Event Strobe to Async (-> TCB START)
+    " lds    r30, %[TCA]       \n\t" // 3 Read TCA Counter Value
+    " sts %[EVS], r24          \n\t" // 2 Send Event Strobe to Sync (-> TCA COUNT+)
+    " lds    r24, %[ADC]       \n\t" // 3 Read ADC Result Value
+    " ldi    r31, lo8(%[DAT])  \n\t" // 1 Load Memory Address Low Byte
+    " add    r30, r31          \n\t" // 1 Add Fetched Counter Value
+    " ldi    r31, hi8(%[DAT])  \n\t" // 1 Load Memory Address High Byte
+    "sbci    r31, 0            \n\t" // 1 Add Carry Flag
+    "  st     -Z, r24          \n\t" // 1 Decrement 1 and Write to Memory
 
-    "  in    r31, %[GP3]  \n\t" // Alternative POP
-    "  in    r30, %[GP2]  \n\t" // Alternative POP
-    "  in    r24, %[GP1]  \n\t" // Alternative POP
-    " out %[SRG], r24     \n\t" // Alternative POP
-    "  in    r24, %[GP0]  \n\t" // Alternative POP
+    "  in    r31, %[GP3]  \n\t" // 1 Alternative POP (Reduce 1 clock per POP)
+    "  in    r30, %[GP2]  \n\t" // 1
+    "  in    r24, %[GP1]  \n\t" // 1
+    " out %[SRG], r24     \n\t" // 1
+    "  in    r24, %[GP0]  \n\t" // 1
 
-    "reti                 \n\t" // Return and Set Interrupt
+    "reti                 \n\t" // 4 Return and Set Interrupt
     :
     : [DAT] "o" (LineData)
     , [SRG] "p" _SFR_MEM_ADDR(SREG)
