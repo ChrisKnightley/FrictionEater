@@ -11,7 +11,7 @@ void analyzeData() {
     case MODE_TIGHT_RIGHT:
     case MODE_LOST:
       {
-        unsigned char minValue = 0;
+        unsigned char minValue = 0xFF;
         unsigned char maxValue = 0;
         unsigned char current = 0;
         unsigned int section[7] = {0, 0, 0, 0, 0, 0, 0};
@@ -26,27 +26,27 @@ void analyzeData() {
           if (minValue > LineData[px]) minValue = LineData[px];
           switch (current) {
             case 0:
-              if (px >= 19) current++;
+              if (px >= 13) current++;
               break;
             case 1:
               section[current] += LineData[px] + CalibrationData[px];
-              if (px >= 37) current++;
+              if (px >= 33) current++;
               break;
             case 2:
               section[current] += LineData[px] + CalibrationData[px];
-              if (px >= 55) current++;
+              if (px >= 53) current++;
               break;
             case 3:
               section[current] += LineData[px] + CalibrationData[px];
-              if (px >= 71) current++;
+              if (px >= 73) current++;
               break;
             case 4:
               section[current] += LineData[px] + CalibrationData[px];
-              if (px >= 89) current++;
+              if (px >= 93) current++;
               break;
             case 5:
               section[current] += LineData[px] + CalibrationData[px];
-              if (px >= 107) current++;
+              if (px >= 113) current++;
               break;
             case 6:
               break;

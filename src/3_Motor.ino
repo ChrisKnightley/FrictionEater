@@ -24,7 +24,7 @@ INLINE void Motor_Left(bool towards = FORWARD) {
   static signed char steps = 1;
   switch (towards) {
     case FORWARD:
-      if (++steps > 4) steps = 0;
+      if (++steps > 4) steps = 1;
       break;
     case REVERSE:
       if (--steps == 0) steps = 4;
@@ -54,7 +54,7 @@ INLINE void Motor_Right(bool towards = FORWARD) {
   static signed char steps = 1;
   switch (towards) {
     case FORWARD:
-      if (++steps > 4) steps = 0;
+      if (++steps > 4) steps = 1;
       break;
     case REVERSE:
       if (--steps == 0) steps = 4;
